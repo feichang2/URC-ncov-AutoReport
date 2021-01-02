@@ -17,7 +17,7 @@ class Report(object):
 
     def report(self):
         loginsuccess = False
-        retrycount = 5
+        retrycount = 1
         while (not loginsuccess) and retrycount:
             session = self.login()
             cookies = session.cookies
@@ -55,11 +55,14 @@ class Report(object):
 
         url = "http://weixine.ustc.edu.cn/2020/daliy_report"
         session.post(url, data=data, headers=headers)
-        data = session.get("http://weixine.ustc.edu.cn/2020").text
+        data = session.get("http://weixine.ustc.edu.cn/2020/home").text
+        with open('a.html','w') as f:
+            f.write(data)
         soup = BeautifulSoup(data, 'html.parser')
-        pattern = re.compile("2020-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")
+        pattern = re.compile("2021-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")
         token = soup.find(
-            "span", {"style": "position: relative; top: 5px; color: #666;"})
+            "span", {"style": "position: relative; top: 5px; color: #666;"})#本次上报时间的提示
+        print(token)
         flag = False
         if pattern.search(token.text) is not None:
             date = pattern.search(token.text).group()
@@ -99,7 +102,7 @@ if __name__ == "__main__":
     parser.add_argument('password', help='your CAS password', type=str)
     args = parser.parse_args()
     autorepoter = Report(stuid=args.stuid, password=args.password, data_path=args.data_path)
-    count = 5
+    count = 1
     while count != 0:
         ret = autorepoter.report()
         if ret != False:
